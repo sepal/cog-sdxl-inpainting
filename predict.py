@@ -93,16 +93,24 @@ class Predictor(BasePredictor):
         ),
     ) -> Path:
         """Run a single prediction on the model"""
+        if seed is None:
+            seed = int.from_bytes(os.urandom(2), "big")
+        generator = torch.Generator("cuda").manual_seed(0)
 
         images = self.__pipe(
             prompt=prompt,
             negative_prompt=negative_prompt,
             image=get_image(image),
             mask_image=get_image(mask),
+            guidance_scale=guidance_scale,
+            num_inference_steps=num_inference_steps,
+            strength=prompt_strength,
+            generator=generator
         ).images
 
         output_path = f"/tmp/out.png"
 
         images[0].save(output_path)
+        print(output_path)
 
         return Path(output_path)
